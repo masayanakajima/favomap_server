@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  node_app:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    container_name: app
+    volumes:
+      - /usr/src/node_modules
+      - ./node:/usr/src/app
+    command: bash -c "/usr/src/app/sh/initialize.sh"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - node_app
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: example_password
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    volumes:
+      - ./mysql/init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+
